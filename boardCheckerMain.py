@@ -4,7 +4,7 @@ import time
 import math
 import random
 from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze,main
-n = 11 # n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+n = 5# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
 t = 1000 # time(in ms) between 2 consecutive steps #lower the time for faster result 
 minColor = 80
 colorDecreaseValue = 20
@@ -80,8 +80,8 @@ def draw_sqaure(screen):
     global s
     currentPos =  getCurrentPos(maze, startPos, path[s])
     pixelPos = (math.floor((currentPos[1])*SQUARESIZE)+5,math.floor((currentPos[0])*SQUARESIZE)+5)
-    color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
-    #color = [random.randint(100,250),random.randint(100,250),random.randint(100,250)]#change color of square independent to previosu color of square
+    #color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
+    color = [random.randint(200,250),random.randint(100,250),random.randint(50,250)]#change color of square independent to previosu color of square
     #screen.set_at(pixelPos,(0,50,165))
     #print(((currentPos[1]+5)*SQUARESIZE,(currentPos[0]+5)*SQUARESIZE))
     

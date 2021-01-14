@@ -7,7 +7,8 @@ def createMazeCode():
     code = "maze = [] \n"
     for i in range(n):
         print("Enter maze row --> ")
-        s = input("-"*n +"\n");    
+        #s = input("-"*n +"\n"); # manual input
+        s = " "*n
         code = code + "maze.append(["
         for j in list(s):
             code +=  '"' + j +'",'
