@@ -3,13 +3,33 @@ import sys
 import time
 import math
 import random
-from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze,main
-n = 5# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
-t = 1000 # time(in ms) between 2 consecutive steps #lower the time for faster result 
-minColor = 80
-colorDecreaseValue = 20
-maze = createMaze(n)
-stepMade = ""
+from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze, main as BFSMain
+#Variable for user to control
+n = 11# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+minColor = 80 # minimum color value of rgb  allowed 
+colorDecreaseValue = 20 # amount of color valueto decrease from r g b when program steps on same square
+relativeColorChange =  False # if true then squares will chnage its color relative to its previous color
+waitTime = 1 # wait time before start solving the maze
+screenSize = width,height = 1000,1000 # dimension of window
+
+
+
+
+#print(screenSize)
+
+#Colors Constant
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+BLUE =  (0,0,255)
+RED = (255,0,0)
+GREEN = (0,255,0)
+
+#Global variables
+maze = createMaze(n) # stores maze in 2D Array format
+rowCount = len(maze)
+colCount = len(maze[0])
+SQUARESIZE =  width/colCount
+
 
 def findStart(maze):
     #Searches for staring point(0) in maze
@@ -22,8 +42,10 @@ def findStart(maze):
                 c = elementPos
     
     return [r,c];
-shortPath,path = main(n)
+startPos =  findStart(maze)
+
 def getCurrentPos(maze,startPos,movesMade):
+    #Returns the coordinate of steps in maze
     row = startPos[0]
     col = startPos[1]
     for m in movesMade:
@@ -37,52 +59,41 @@ def getCurrentPos(maze,startPos,movesMade):
             row += 1
         
     return [row,col]
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-BLUE =  (0,0,255)
-RED = (255,0,0)
-GREEN = (0,50,0)
-screenSize = width,height = 1000,1000
-FPS = 420 #Frame per second
-rowCount = len(maze)
-colCount = len(maze[0])
-SQUARESIZE =  width/colCount
-#print(screenSize)
+
+
 
 def getcolor(row,col):
+    #Decides color of square depedning on current value of 2D arrray
     currentsquareOnMaze =  maze[row][col]
     color = ()
-    if currentsquareOnMaze == " ":
-        color = WHITE
+    if currentsquareOnMaze == " ": 
+        color = WHITE              #Empty space
     elif currentsquareOnMaze == "#":
-        color = BLACK
+        color = BLACK              #Obstracle
     elif currentsquareOnMaze == "0":
-        color =  BLUE
+        color =  BLUE              #Starting point
     elif currentsquareOnMaze == "x":
-        color = RED
-    else:
+        color = RED                #Finale desnination point
+    else:               
         print("ERROR in @def getcolor : unable to deterimine color of square - " , '"'+currentsquareOnMaze+'"')
     return color
         
         
 def draw_maze(screen):
-    
+    #Convert 2d Array int0 maze
     
     #print(SQUARESIZE)
     for row in range(rowCount):
         for col in range(0,colCount):
             pygame.draw.rect(screen,getcolor(row, col),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
-        
-s = 0
-startPos =  findStart(maze)
-def draw_sqaure(screen):
-    global stepMade
-    global s
-    currentPos =  getCurrentPos(maze, startPos, path[s])
+def get_newSquareColor(currentPos,relativeColorChange = False):
     pixelPos = (math.floor((currentPos[1])*SQUARESIZE)+5,math.floor((currentPos[0])*SQUARESIZE)+5)
-    #color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
-    color = [random.randint(200,250),random.randint(100,250),random.randint(50,250)]#change color of square independent to previosu color of square
-    #screen.set_at(pixelPos,(0,50,165))
+    if relativeColorChange:
+        color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
+    else:
+        #change color of square independent to previosu color of square
+        color = [random.randint(200,250),random.randint(100,250),random.randint(50,250)]
+    
     #print(((currentPos[1]+5)*SQUARESIZE,(currentPos[0]+5)*SQUARESIZE))
     
     if(color[1]>minColor):
@@ -91,55 +102,63 @@ def draw_sqaure(screen):
         color[0] -= colorDecreaseValue
     elif(color[2] >minColor):
         color[2] -= colorDecreaseValue
-    
+    return color
+
+s = 0 # counts the no. of loop executed 
+def draw_sqaure(screen,path):
+    #Change color of square once program steps on it
+    global s 
+    currentPos =  getCurrentPos(maze, startPos, path[s])
+    color =  get_newSquareColor(currentPos,relativeColorChange)
     pygame.draw.rect(screen,color,(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
     s +=1
     
-def draw_square_short_path(screen):
+def draw_square_short_path(screen,path):
+    #Colors the given path green
     d = ""
     for i in path[len(path)-1]:
+        #The method pick up last element of path array which is aLSO SHORTEST path of maze and paints it green
         d += i
         currentPos =  getCurrentPos(maze, findStart(maze),d)
-        pygame.draw.rect(screen,[0,255,0],(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
         
-pygame.init()
-screen = pygame.display.set_mode(screenSize)
-drawEvent = pygame.USEREVENT+1
+        pygame.draw.rect(screen,GREEN,(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
+        
 
-#pygame.time.set_timer(drawEvent, t)
+def animateMazeSolving(screen,path):
+        if s < len(path):
+            draw_sqaure(screen,path)
+        else:
+            draw_square_short_path(screen,path)
+            pygame.display.update()
+            
+            #pygame.quit()
+screen = pygame.display.set_mode(screenSize)
+#pygame.time.set_timer(drawEvent, t) # slows down the program do not use with low value of t
 def main():
+    shortPath,path = BFSMain(n) 
+    pygame.init()
+    
     isRunning = True
     screen.fill(WHITE) #Background color of maze 
-    #clock = pygame.time.Clock()
+   
     
     draw_maze(screen)
     pygame.display.update()
     #print("No. of turns -",s)
     print("genrating a maze")
     print("will start solving maze in few seconds")
-    time.sleep(5)
+    time.sleep(waitTime)
     print("Starting to  solve the maze")
     while isRunning:
-        
-        
-     #   clock.tick(FPS)
-        if s < len(path):
-            draw_sqaure(screen)
-        else:
-            draw_square_short_path(screen)
-            print("Total time in sec -",pygame.time.get_ticks()//1000)
-            pygame.display.update()
-            #pygame.quit()
+        animateMazeSolving(screen,path)
         pygame.display.update()
         for event  in pygame.event.get():
             if event.type == pygame.QUIT:
                 print("Executing quit command .")
                 isRunning = False
                 sys.exit
-            elif event.type == drawEvent:
-                if s < len(path):
-                    pass
-                  #  draw_sqaure(screen)
+            
+                  
                 
         
                 
