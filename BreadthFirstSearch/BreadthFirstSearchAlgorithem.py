@@ -1,7 +1,7 @@
 import queue
 
 #Tip : You can create easy maze code from mazeCodeCreator.py
-
+n=11 # n is dimension of maze nxn
 def createMaze(n):
     
     # n is dimension of maze nxn
@@ -15,7 +15,7 @@ def createMaze(n):
     elif n == 5:
         
         maze.append(["#"," ","#","0","#"]) 
-        maze.append([" ","#","#"," "," "]) 
+        maze.append([" ","#"," "," "," "]) 
         maze.append([" "," "," ","#"," "]) 
         maze.append([" ","#"," "," "," "]) 
         maze.append(["x","#"," ","#"," "]) 
@@ -92,27 +92,32 @@ def getCurrentPos(maze,startPos,movesMade):
         
     return [row,col]
     
-def getValidMoves(maze,currentPos):
+def getValidMoves(maze,currentPos,lastpath):
+    lastmove = ""
+    if lastpath != "":
+        #Do not move back to last square
+        lastmove = lastpath[len(lastpath)-1]
     validMoves = []
     row = currentPos[0]
     col = currentPos[1]
     
-    if( row < len(maze[0])-1 and maze[row +1][col] != "#"  ):
+    if( row < len(maze[0])-1 and maze[row +1][col] != "#" and lastmove != "U" ):
         validMoves.append("D")
-    if( row > 0 and maze[row -1][col] != "#"   ):
+    if( row > 0 and maze[row -1][col] != "#"  and lastmove != "D" ):
         validMoves.append("U")
     
-    if( col < len(maze[0])-1 and maze[row][col + 1] != "#" ):
+    if( col < len(maze[0])-1 and maze[row][col + 1] != "#"  and lastmove != "L"):
        validMoves.append("R")
-    if(col > 0 and  maze[row][col-1] != "#"  ):
+    if(col > 0 and  maze[row][col-1] != "#" and lastmove != "R" ):
          
         validMoves.append("L")
     
     return validMoves
-def main(n):
+def main(maze):
+    print("Starting breadthFirst Search")
     # n is dimension of maze nxn
     pathExplored = [] # variable is also called in boardCheckerMain.py
-    maze =  createMaze(n)
+    maze =  maze
     startPos =   findStart(maze)   
     endPos =  findEnd(maze)
     currentPos = startPos
@@ -128,8 +133,11 @@ def main(n):
             pathExplored.append(add)
         #print(currentPos)
         steps +=1;
-        for j in getValidMoves(maze,currentPos):
+        for j in getValidMoves(maze,currentPos,add):
             q.put(add +j)
+        if steps > 50000:
+            break
+            print("Too many steps unable to find it")
         
     print("Shortest Path = "+add)
     print("Total steps - "+ str(steps))
@@ -137,4 +145,4 @@ def main(n):
     
     return shortestPath,pathExplored #shortestPath,All path explored return type list,list
 
-main(11)
+#main(createMaze(10))

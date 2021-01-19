@@ -104,7 +104,7 @@ def findStart(maze):
     
     return [r,c];
 def heuristic(current_Node,end_node):
-    D =1
+    D =10
     dx = abs(current_Node.position[0] - end_node.position[0] )
     dy = abs(current_Node.position[1] - end_node.position[1])
     return D * (dx + dy)
@@ -131,80 +131,89 @@ def getValidMoves(maze,currentPos,visited):
                 validMoves.remove(m)
                 
     return validMoves
-
+def returnPath(current_Node):
     
-maze =  createMaze(11)
-startPos =  findStart(maze)
-endPos = findEnd(maze)
-
-start_node = Node(None,startPos,0,0)
-end_node = Node(None,endPos,0,0)
-
-current_Node  =  start_node
-visited = []
-not_visited = []
-print("starting loop")
-j = 0 
-while(current_Node.position != endPos ):
-    visited.append(current_Node)
-    print(current_Node.position)
-    moves =  getValidMoves(maze,current_Node.position,visited)
-    print(moves)
-    for move  in moves:
-        g = current_Node.g + normalMoveCost
-        h = heuristic(current_Node,end_node)
-        childpos = getchildPos(maze, current_Node.position, move)
-        print(childpos)
-        new_node=Node(current_Node,childpos,g,h)
+    node = current_Node
+    finalepathPos = []
+    finalepathPos.append(node.position)
+    while(node.parent != None):
         
-        not_visited.append(new_node)
+        finalepathPos.append(node.parent.position)
+        node = node.parent
+    finalepathPos.reverse()
     
-    current_Node = not_visited[0]
-    for i,node in enumerate(not_visited):
+    d = finalepathPos[0]
+    finalepathPos.remove(d)
+    #print(d)
+    finalePath = []
+    #print(finalepathPos)
+    for pos in finalepathPos:
+        px =  pos[0]-d[0]
+        py =  pos[1]-d[1]
+        movee = ""
+        if px == 1:
+            movee = "D"
+        if px == -1:
+            movee = "U"
+        if py == -1:
+            movee = "L"
+        if py == 1:
+            movee = "R"
+        finalePath.append(movee)
+        d = pos
+    return "".join(finalePath)
+def main(maze): 
+    print("Starting search using A star algorithem")
+    startPos =  findStart(maze)
+    endPos = findEnd(maze)
+    
+    start_node = Node(None,startPos,0,0)
+    end_node = Node(None,endPos,0,0)
+    
+    current_Node  =  start_node
+    visited = []
+    not_visited = []
+    print("starting loop")
+    j = 0
+    pathExplored = []
+    while(current_Node.position != endPos ):
+        visited.append(current_Node)
         
-        current_Node_index = None
-        #print(node.position ," vs ",current_Node.position)
-        #print(node.f , " vs ", current_Node.f)
-        #print(node.h , " vs ",current_Node.f)
-        if node.f < current_Node.f:
-            current_Node = node
-            current_Node_index = i
-    not_visited.remove(current_Node)
-    j +=1
-    print()
-print("Path founded")
-print(j)
-node = current_Node
-finalepathPos = []
-finalepathPos.append(node.position)
-while(node.parent != None):
+        #print(current_Node.position)
+        moves =  getValidMoves(maze,current_Node.position,visited)
+        #print(moves)
+        for move  in moves:
+            g = current_Node.g + normalMoveCost
+            h = heuristic(current_Node,end_node)
+            childpos = getchildPos(maze, current_Node.position, move)
+         #   print(childpos)
+            new_node=Node(current_Node,childpos,g,h)
+            
+            not_visited.append(new_node)
+        
+        current_Node = not_visited[0]
+        for i,node in enumerate(not_visited):
+            
+            current_Node_index = None
+            #print(node.position ," vs ",current_Node.position)
+            #print(node.f , " vs ", current_Node.f)
+            #print(node.h , " vs ",current_Node.f)
+            if node.f < current_Node.f:
+                
+                current_Node = node
+                current_Node_index = i
+        not_visited.remove(current_Node)
+        pathExplored.append(returnPath(current_Node))
+        j +=1
+       # print()
+    print("Path founded")
+    print("Total No. OF steps - ",j)
+    finalePath = returnPath(current_Node)
+    print(finalePath)
     
-    finalepathPos.append(node.parent.position)
-    node = node.parent
-finalepathPos.reverse()
-
-d = finalepathPos[0]
-finalepathPos.remove(d)
-print(d)
-finalePath = []
-print(finalepathPos)
-for pos in finalepathPos:
-    px =  pos[0]-d[0]
-    py =  pos[1]-d[1]
-    movee = ""
-    if px == 1:
-        movee = "D"
-    if px == -1:
-        movee = "U"
-    if py == -1:
-        movee = "L"
-    if py == 1:
-        movee = "R"
-    finalePath.append(movee)
-    d = pos
-print("".join(finalePath))
-
-
+    return finalePath,pathExplored
+    
+#main(createMaze(10))   
 
 
 

@@ -4,14 +4,15 @@ import time
 import math
 import random
 from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze, main as BFSMain
+from Astar.a_star_algorithem import main as AStarMain
 #Variable for user to control
-n = 11# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+n = 20# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
 minColor = 80 # minimum color value of rgb  allowed 
 colorDecreaseValue = 20 # amount of color valueto decrease from r g b when program steps on same square
-relativeColorChange =  False # if true then squares will chnage its color relative to its previous color
+relativeColorChange =  True # if true then squares will chnage its color relative to its previous color
 waitTime = 1 # wait time before start solving the maze
-screenSize = width,height = 1000,1000 # dimension of window
-
+screenSize = width,height = 800,800 # dimension of window
+searchChoice = 1 # 0  = breathFirst seatch 1 = A star Search
 
 
 
@@ -25,10 +26,32 @@ RED = (255,0,0)
 GREEN = (0,255,0)
 
 #Global variables
-maze = createMaze(n) # stores maze in 2D Array format
-rowCount = len(maze)
-colCount = len(maze[0])
-SQUARESIZE =  width/colCount
+
+def createEmptyMaze(n):
+    maze =[]
+    
+    for i in range(0,n):
+        m = []
+        for j in range(0,n):
+            m.append(" ")
+        maze.append(m)
+   # print(maze)
+    return maze
+    
+#maze = createMaze(n) # stores maze in 2D Array format
+
+
+def findEnd(maze):
+    #Searches for Ending point(x)  in maze
+    r =-1 #Row coordinate
+    c = -1 # Column Coordinate
+    for rowPos,row in enumerate(maze):
+        for elementPos,element in enumerate(maze[rowPos]):
+            if element == "x":
+                r = rowPos
+                c = elementPos
+    
+    return [r,c];
 
 
 def findStart(maze):
@@ -42,7 +65,7 @@ def findStart(maze):
                 c = elementPos
     
     return [r,c];
-startPos =  findStart(maze)
+
 
 def getCurrentPos(maze,startPos,movesMade):
     #Returns the coordinate of steps in maze
@@ -62,7 +85,7 @@ def getCurrentPos(maze,startPos,movesMade):
 
 
 
-def getcolor(row,col):
+def getcolor(row,col,maze):
     #Decides color of square depedning on current value of 2D arrray
     currentsquareOnMaze =  maze[row][col]
     color = ()
@@ -79,14 +102,16 @@ def getcolor(row,col):
     return color
         
         
-def draw_maze(screen):
+def draw_maze(screen,rowCount,colCount,SQUARESIZE,maze):
     #Convert 2d Array int0 maze
     
     #print(SQUARESIZE)
     for row in range(rowCount):
         for col in range(0,colCount):
-            pygame.draw.rect(screen,getcolor(row, col),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
-def get_newSquareColor(currentPos,relativeColorChange = False):
+            pygame.draw.rect(screen,getcolor(row, col,maze),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
+        
+def get_newSquareColor(currentPos,SQUARESIZE,relativeColorChange = False):
+    
     pixelPos = (math.floor((currentPos[1])*SQUARESIZE)+5,math.floor((currentPos[0])*SQUARESIZE)+5)
     if relativeColorChange:
         color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
@@ -105,18 +130,19 @@ def get_newSquareColor(currentPos,relativeColorChange = False):
     return color
 
 s = 0 # counts the no. of loop executed 
-def draw_sqaure(screen,path):
+def draw_sqaure(screen,path,startPos,SQUARESIZE,maze):
     #Change color of square once program steps on it
     global s 
     currentPos =  getCurrentPos(maze, startPos, path[s])
-    color =  get_newSquareColor(currentPos,relativeColorChange)
+    color =  get_newSquareColor(currentPos,SQUARESIZE,relativeColorChange)
+   # print((currentPos[1],currentPos[0]))
     pygame.draw.rect(screen,color,(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
     s +=1
     
-def draw_square_short_path(screen,path):
+def draw_square_short_path(screen,path,SQUARESIZE,maze):
     #Colors the given path green
     d = ""
-    for i in path[len(path)-1]:
+    for i in path:
         #The method pick up last element of path array which is aLSO SHORTEST path of maze and paints it green
         d += i
         currentPos =  getCurrentPos(maze, findStart(maze),d)
@@ -124,40 +150,97 @@ def draw_square_short_path(screen,path):
         pygame.draw.rect(screen,GREEN,(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
         
 
-def animateMazeSolving(screen,path):
+def animateMazeSolving(screen,path,shortestPath,startpath,SQUARESIZE,maze):
         if s < len(path):
-            draw_sqaure(screen,path)
+            draw_sqaure(screen,path,startpath,SQUARESIZE,maze)
         else:
-            draw_square_short_path(screen,path)
+            draw_square_short_path(screen,shortestPath,SQUARESIZE,maze)
             pygame.display.update()
             
             #pygame.quit()
+def drawMaze(n,drawMazeByUser = True):
+    maze = []
+    if drawMazeByUser:
+        maze =createEmptyMaze(n)
+    else:
+        maze = createMaze(n)
+    return maze
+       
+def solvemaze(maze,n):
+    if n ==0:
+        return BFSMain(maze)
+    if n ==1:
+        return AStarMain(maze)
 screen = pygame.display.set_mode(screenSize)
 #pygame.time.set_timer(drawEvent, t) # slows down the program do not use with low value of t
 def main():
-    shortPath,path = BFSMain(n) 
+    maze = drawMaze(n,drawMazeByUser=True) 
+    rowCount = len(maze)
+    colCount = len(maze[0])
+    SQUARESIZE =  width/colCount
+    startPos =  None
     pygame.init()
     
     isRunning = True
     screen.fill(WHITE) #Background color of maze 
    
-    
-    draw_maze(screen)
+    path = []
+    shortPath = []
+    draw_maze(screen,rowCount,colCount,SQUARESIZE,maze)
     pygame.display.update()
     #print("No. of turns -",s)
     print("genrating a maze")
     print("will start solving maze in few seconds")
-    time.sleep(waitTime)
+    #time.sleep(waitTime)
     print("Starting to  solve the maze")
+    solvingmaze = False
     while isRunning:
-        animateMazeSolving(screen,path)
+        if solvingmaze:
+            animateMazeSolving(screen,path,shortPath,startPos,SQUARESIZE,maze)
         pygame.display.update()
         for event  in pygame.event.get():
             if event.type == pygame.QUIT:
                 print("Executing quit command .")
                 isRunning = False
                 sys.exit
+            if solvingmaze:
+                continue # Disable user control
+            if pygame.mouse.get_pressed()[0] :
+                
+                
+                clickpos = pygame.mouse.get_pos()
+                    
+                row = math.floor(clickpos[1]/SQUARESIZE)
+                col = math.floor(clickpos[0]/SQUARESIZE)
+                if findStart(maze)[0] == -1 or  findStart(maze)[1] == -1:
+                    maze[row][col] = "0"
+                elif findEnd(maze)[0] == -1 or  findEnd(maze)[1] == -1:
+                    maze[row][col] = "x"    
+                else:
+                    maze[row][col] = "#"
+                pygame.draw.rect(screen,getcolor(row, col,maze),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
+                    #print(maze)
+                    
+                draw_maze(screen,row,col,SQUARESIZE,maze)
+            if pygame.mouse.get_pressed()[2] :
+                  #Remove object
+                  clickpos = pygame.mouse.get_pos()
+                  
+                  row = math.floor(clickpos[1]/SQUARESIZE)
+                  col = math.floor(clickpos[0]/SQUARESIZE)
+                  maze[row][col] = " "
+                  pygame.draw.rect(screen,getcolor(row, col,maze),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
+                  
+                
             
+            if event.type == pygame.KEYDOWN :
+                if event.key == pygame.K_SPACE:
+                    
+                    shortPath,path = solvemaze(maze,searchChoice)
+                    startPos = findStart(maze)
+                    #print(path)
+                    solvingmaze = True
+                 
                   
                 
         
