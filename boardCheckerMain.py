@@ -6,9 +6,10 @@ import random
 from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze, main as BFSMain
 from Astar.a_star_algorithem import main as AStarMain
 #Variable for user to control
-n = 20# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+n = 100# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+drawMazeByUser = True # Set true if you want to draw maze your self
 minColor = 80 # minimum color value of rgb  allowed 
-colorDecreaseValue = 20 # amount of color valueto decrease from r g b when program steps on same square
+colorDecreaseValue = 100 # amount of color valueto decrease from r g b when program steps on same square
 relativeColorChange =  True # if true then squares will chnage its color relative to its previous color
 waitTime = 1 # wait time before start solving the maze
 screenSize = width,height = 800,800 # dimension of window
@@ -174,7 +175,7 @@ def solvemaze(maze,n):
 screen = pygame.display.set_mode(screenSize)
 #pygame.time.set_timer(drawEvent, t) # slows down the program do not use with low value of t
 def main():
-    maze = drawMaze(n,drawMazeByUser=True) 
+    maze = drawMaze(n,drawMazeByUser) 
     rowCount = len(maze)
     colCount = len(maze[0])
     SQUARESIZE =  width/colCount
@@ -203,8 +204,13 @@ def main():
                 print("Executing quit command .")
                 isRunning = False
                 sys.exit
+            if solvingmaze and  event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s  :
+                    pass #TODO: make a save feature
+                    
+                    
             if solvingmaze:
-                continue # Disable user control
+                continue # Disable user control(below this if block)
             if pygame.mouse.get_pressed()[0] :
                 
                 
@@ -238,6 +244,8 @@ def main():
                     
                     shortPath,path = solvemaze(maze,searchChoice)
                     startPos = findStart(maze)
+                    for m in maze:
+                        print("".join(m))
                     #print(path)
                     solvingmaze = True
                  

@@ -33,26 +33,25 @@ def createMaze(n):
         maze.append(["#"," ","#"," ","#"," ","#"," ","#"," "]) 
         maze.append(["#","0","#","#","#","#","#","#","#","#"])
     elif n == 11:
-        maze.append(["#","0"," "," "," "," "," "," ","#"," ","#"])
+        maze.append(["#","0"," "," "," "," "," "," ","#","x","#"])
         maze.append(["#","#"," ","#","#"," ","#"," ","#"," ","#"])
         maze.append(["#"," "," "," ","#"," ","#"," ","#"," ","#"])
         maze.append(["#"," ","#","#","#"," "," "," ","#"," ","#"])
-        maze.append(["#"," ","#"," "," "," ","#"," "," "," ","#"])
+        maze.append(["#"," ","#"," "," "," ","#"," ","#"," ","#"])
         maze.append(["#"," "," "," ","#"," ","#"," ","#"," ","#"])
         maze.append(["#"," ","#"," "," "," "," "," ","#"," ","#"])
-        maze.append(["#"," ","#","#","#","#","#","#","#"," ","#"])
-        maze.append(["#"," "," "," "," "," "," "," "," ","x","#"])
-        maze.append(["#","#","#","#","#","#","#","#","#","#","#"])
-        maze.append(["#","#","#","#","#","#","#","#","#","#","#"])
+        maze.append(["#"," ","#","#","#","#","#","#","#"," "," "])
+        maze.append(["#"," "," "," "," "," "," "," "," ","#"," "])
+        maze.append(["#","#","#","#","#","#","#","#"," ","#"," "])
+        maze.append(["#","#","#","#","#","#","#","#"," "," "," "])
         
-    elif n == 100:
+    else:
         #DO NOT USE THIS  CONDITION 
-        file =  open("E:\python programs\pathfinderAlgorithems\BreadthFirstSearch\maze001.txt","r")
+        file =  open("E:\python programs\pathfinderAlgorithems\BreadthFirstSearch\maze"+str(n)+".txt","r")
         maze = []
         for line in file:
             maze.append(list(line.replace("\n", "")))
-    else:
-        print("Only 3 5 10 as argument of main func is valid")
+
     return maze
 def findEnd(maze):
     #Searches for Ending point(x)  in maze

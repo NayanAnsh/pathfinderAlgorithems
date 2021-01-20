@@ -1,3 +1,4 @@
+import time
 normalMoveCost = 1
 
 class Node:
@@ -57,7 +58,7 @@ def createMaze(n):
         maze.append(["#","#","#","#","#","#","#","#","#","#","#"])
         maze.append(["#","#","#","#","#","#","#","#","#","#","#"])
         
-    elif n == 100:
+    elif n == 20:
         #DO NOT USE THIS  CONDITION 
         file =  open("E:\python programs\pathfinderAlgorithems\BreadthFirstSearch\maze001.txt","r")
         maze = []
@@ -128,6 +129,7 @@ def getValidMoves(maze,currentPos,visited):
         for m in validMoves:
             pos = getchildPos(maze, currentPos, m)
             if pos == node.position:
+               # print("removing from valid path ",m)
                 validMoves.remove(m)
                 
     return validMoves
@@ -153,16 +155,33 @@ def returnPath(current_Node):
         movee = ""
         if px == 1:
             movee = "D"
-        if px == -1:
+        elif px == -1:
             movee = "U"
-        if py == -1:
+        elif py == -1:
             movee = "L"
-        if py == 1:
+        elif py == 1:
             movee = "R"
         finalePath.append(movee)
         d = pos
     return "".join(finalePath)
+def chooseNewNode(not_visited):
+    newNode = not_visited[0]
+    for i,node in enumerate(not_visited):
+        
+            
+        newNodeindex = None
+        
+        #print(node.position ," vs ",newNode.position)
+        #print(node.f , " vs ", newNode.f)
+        #print(node.h , " vs ",newNode.f)
+        if node.f < newNode.f:
+            
+                
+            newNode = node
+            newNodeindex = i
+    return newNode
 def main(maze): 
+    start_time = time.time()
     print("Starting search using A star algorithem")
     startPos =  findStart(maze)
     endPos = findEnd(maze)
@@ -182,35 +201,35 @@ def main(maze):
         #print(current_Node.position)
         moves =  getValidMoves(maze,current_Node.position,visited)
         #print(moves)
+
+            
+            
+            
         for move  in moves:
             g = current_Node.g + normalMoveCost
             h = heuristic(current_Node,end_node)
             childpos = getchildPos(maze, current_Node.position, move)
-         #   print(childpos)
+           # print(childpos)
             new_node=Node(current_Node,childpos,g,h)
             
             not_visited.append(new_node)
         
-        current_Node = not_visited[0]
-        for i,node in enumerate(not_visited):
-            
-            current_Node_index = None
-            #print(node.position ," vs ",current_Node.position)
-            #print(node.f , " vs ", current_Node.f)
-            #print(node.h , " vs ",current_Node.f)
-            if node.f < current_Node.f:
-                
-                current_Node = node
-                current_Node_index = i
+        
+        current_Node = chooseNewNode(not_visited)
         not_visited.remove(current_Node)
         pathExplored.append(returnPath(current_Node))
+        #if j > 4000:
+        
+         #   print("Unable to find the path")
+           # break
         j +=1
-       # print()
+        #print()
     print("Path founded")
     print("Total No. OF steps - ",j)
     finalePath = returnPath(current_Node)
+   
     print(finalePath)
-    
+    print("Time Taken - " , (time.time() - start_time))
     return finalePath,pathExplored
     
 #main(createMaze(10))   
