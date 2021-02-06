@@ -8,11 +8,14 @@ from BreadthFirstSearch.BreadthFirstSearchAlgorithem import  main as BFSMain
 from Astar.a_star_algorithem import main as AStarMain
 from maze.random_maze import random_maze
 from maze.mazeExtractor import maze as mazeClass
+
+
+
 #Variable for user to control
 n = 20# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
 drawMazeOption = 2 # if 1 then darw a empty maze ..if 2 then extract maze if 3 then genrate a random maze
 ########if drawMazeOption = 2 then bellow variables will  be used###########
-mazeName = "tyu"
+mazeName = "randomMaze" #check text file in maze folder for more options
 ########if drawMazeOption = 3 the bellow variables will  be used for random maze genrator###########
 w = 100
 h = 100
@@ -253,6 +256,7 @@ def main():
                 draw_maze(screen,row,col,SQUARESIZE,maze)
             if pygame.mouse.get_pressed()[2] :
                   #Remove object
+                  #Right click remove object
                   clickpos = pygame.mouse.get_pos()
                   
                   row = math.floor(clickpos[1]/SQUARESIZE)
