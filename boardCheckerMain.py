@@ -1,18 +1,30 @@
+
 import pygame
 import sys
 import time
 import math
 import random
-from BreadthFirstSearch.BreadthFirstSearchAlgorithem import createMaze, main as BFSMain
+from BreadthFirstSearch.BreadthFirstSearchAlgorithem import  main as BFSMain
 from Astar.a_star_algorithem import main as AStarMain
+from maze.random_maze import random_maze
+from maze.mazeExtractor import maze as mazeClass
 #Variable for user to control
-n = 100# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
-drawMazeByUser = True # Set true if you want to draw maze your self
+n = 20# n is dimension of maze nxn # Only 3 5 10 as argument of main func is valid
+drawMazeOption = 2 # if 1 then darw a empty maze ..if 2 then extract maze if 3 then genrate a random maze
+########if drawMazeOption = 2 then bellow variables will  be used###########
+mazeName = "tyu"
+########if drawMazeOption = 3 the bellow variables will  be used for random maze genrator###########
+w = 100
+h = 100
+c = 0.9
+d = 0.9
+#Do not forget to set start and end 
+####################################################################################################
 minColor = 80 # minimum color value of rgb  allowed 
 colorDecreaseValue = 100 # amount of color valueto decrease from r g b when program steps on same square
 relativeColorChange =  True # if true then squares will chnage its color relative to its previous color
 waitTime = 1 # wait time before start solving the maze
-screenSize = width,height = 800,800 # dimension of window
+screenSize = width,height = 1000,1000 # dimension of window
 searchChoice = 1 # 0  = breathFirst seatch 1 = A star Search
 
 
@@ -113,7 +125,7 @@ def draw_maze(screen,rowCount,colCount,SQUARESIZE,maze):
         
 def get_newSquareColor(currentPos,SQUARESIZE,relativeColorChange = False):
     
-    pixelPos = (math.floor((currentPos[1])*SQUARESIZE)+5,math.floor((currentPos[0])*SQUARESIZE)+5)
+    pixelPos = (math.floor((currentPos[1])*SQUARESIZE)+2,math.floor((currentPos[0])*SQUARESIZE)+2)
     if relativeColorChange:
         color = list(screen.get_at(pixelPos)) #change color of square relative to previosu color of square
     else:
@@ -149,7 +161,7 @@ def draw_square_short_path(screen,path,SQUARESIZE,maze):
         currentPos =  getCurrentPos(maze, findStart(maze),d)
         
         pygame.draw.rect(screen,GREEN,(currentPos[1]*SQUARESIZE ,currentPos[0]*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
-        
+        pygame.display.update()
 
 def animateMazeSolving(screen,path,shortestPath,startpath,SQUARESIZE,maze):
         if s < len(path):
@@ -159,12 +171,18 @@ def animateMazeSolving(screen,path,shortestPath,startpath,SQUARESIZE,maze):
             pygame.display.update()
             
             #pygame.quit()
-def drawMaze(n,drawMazeByUser = True):
+def drawMaze(n,drawMaze = 1):
     maze = []
-    if drawMazeByUser:
+    
+    if drawMaze == 1:
         maze =createEmptyMaze(n)
-    else:
-        maze = createMaze(n)
+    elif drawMaze == 2:
+        m = mazeClass(mazeName)
+        maze = m.extractMaze()
+    elif drawMaze == 3:
+        print("Genrating a random maze IT will take some time Please wait")
+        maze = random_maze(width = w,height = h,complexity = c,density = d)
+        print("Random maze genrated!Please declare start and goal point")
     return maze
        
 def solvemaze(maze,n):
@@ -173,9 +191,10 @@ def solvemaze(maze,n):
     if n ==1:
         return AStarMain(maze)
 screen = pygame.display.set_mode(screenSize)
+
 #pygame.time.set_timer(drawEvent, t) # slows down the program do not use with low value of t
 def main():
-    maze = drawMaze(n,drawMazeByUser) 
+    maze = drawMaze(n,drawMazeOption) 
     rowCount = len(maze)
     colCount = len(maze[0])
     SQUARESIZE =  width/colCount
@@ -195,6 +214,7 @@ def main():
     #time.sleep(waitTime)
     print("Starting to  solve the maze")
     solvingmaze = False
+    solveMaze = False
     while isRunning:
         if solvingmaze:
             animateMazeSolving(screen,path,shortPath,startPos,SQUARESIZE,maze)
@@ -204,14 +224,17 @@ def main():
                 print("Executing quit command .")
                 isRunning = False
                 sys.exit
-            if solvingmaze and  event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s  :
-                    pass #TODO: make a save feature
+                    name = input("Enter name  of your maze \n")
+                    
+                    m = mazeClass(name)
+                    m.saveMaze(maze)
                     
                     
-            if solvingmaze:
+            if solvingmaze and solveMaze :
                 continue # Disable user control(below this if block)
-            if pygame.mouse.get_pressed()[0] :
+            if pygame.mouse.get_pressed()[0] and not solveMaze :
                 
                 
                 clickpos = pygame.mouse.get_pos()
@@ -238,17 +261,20 @@ def main():
                   pygame.draw.rect(screen,getcolor(row, col,maze),(col*SQUARESIZE ,row*SQUARESIZE,SQUARESIZE-1,SQUARESIZE-1))
                   
                 
-            
             if event.type == pygame.KEYDOWN :
                 if event.key == pygame.K_SPACE:
-                    
+                    if not solveMaze:
+                        shortPath,path = solvemaze(maze,searchChoice)
+                        startPos = findStart(maze)
+                    #for m in maze:
+                    #    print("".join(m))
+                    #print(path)
+                    solveMaze = True
+                    solvingmaze = True
+                if event.key == pygame.K_p and not solveMaze:
                     shortPath,path = solvemaze(maze,searchChoice)
                     startPos = findStart(maze)
-                    for m in maze:
-                        print("".join(m))
-                    #print(path)
-                    solvingmaze = True
-                 
+                    solveMaze = True
                   
                 
         

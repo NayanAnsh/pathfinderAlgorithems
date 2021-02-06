@@ -165,6 +165,8 @@ def returnPath(current_Node):
         d = pos
     return "".join(finalePath)
 def chooseNewNode(not_visited):
+    if not_visited == None or not_visited == []:
+        return None
     newNode = not_visited[0]
     for i,node in enumerate(not_visited):
         
@@ -181,6 +183,7 @@ def chooseNewNode(not_visited):
             newNodeindex = i
     return newNode
 def main(maze): 
+    ispathfound = True
     start_time = time.time()
     print("Starting search using A star algorithem")
     startPos =  findStart(maze)
@@ -216,6 +219,12 @@ def main(maze):
         
         
         current_Node = chooseNewNode(not_visited)
+        if current_Node ==  None  or current_Node == []:
+            print("NO path found!!!! please check if  path does exist")
+            ispathfound = False
+            finalePath = None
+            print("Time Taken to Try every possible path(in seconds) - " , (time.time() - start_time))
+            return finalePath,pathExplored
         not_visited.remove(current_Node)
         pathExplored.append(returnPath(current_Node))
         #if j > 4000:
@@ -224,12 +233,13 @@ def main(maze):
            # break
         j +=1
         #print()
-    print("Path founded")
+    if ispathfound :
+        print("Path Found!!")
     print("Total No. OF steps - ",j)
     finalePath = returnPath(current_Node)
    
     print(finalePath)
-    print("Time Taken - " , (time.time() - start_time))
+    print("Time Taken to solve maze(in seconds) - " , (time.time() - start_time))
     return finalePath,pathExplored
     
 #main(createMaze(10))   

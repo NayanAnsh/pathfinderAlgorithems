@@ -1,58 +1,8 @@
 import queue
-
+import time
+from maze.mazeExtractor import maze as mazeClass
 #Tip : You can create easy maze code from mazeCodeCreator.py
-n=11 # n is dimension of maze nxn
-def createMaze(n):
-    
-    # n is dimension of maze nxn
-    maze = [] 
-    if n == 3:
-        
-        maze.append([" "," "," "]) 
-        maze.append(["#","#","0"]) 
-        maze.append(["x"," "," "])             
-        
-    elif n == 5:
-        
-        maze.append(["#"," ","#","0","#"]) 
-        maze.append([" ","#"," "," "," "]) 
-        maze.append([" "," "," ","#"," "]) 
-        maze.append([" ","#"," "," "," "]) 
-        maze.append(["x","#"," ","#"," "]) 
-        
-    elif n == 10:
-         
-        maze.append([" ","#"," ","#"," "," "," "," ","#","#"]) 
-        maze.append([" "," "," "," "," ","#","x"," "," "," "]) 
-        maze.append(["#","#","#","#","#"," "," ","#","#"," "]) 
-        maze.append(["#"," "," "," "," "," "," "," "," "," "]) 
-        maze.append(["#"," ","#"," ","#"," ","#","#"," "," "]) 
-        maze.append(["#"," "," ","#"," "," ","#"," "," "," "]) 
-        maze.append(["#"," "," "," "," "," "," "," "," ","#"]) 
-        maze.append(["#"," ","#","#","#"," ","#","#","#","#"]) 
-        maze.append(["#"," ","#"," ","#"," ","#"," ","#"," "]) 
-        maze.append(["#","0","#","#","#","#","#","#","#","#"])
-    elif n == 11:
-        maze.append(["#","0"," "," "," "," "," "," ","#","x","#"])
-        maze.append(["#","#"," ","#","#"," ","#"," ","#"," ","#"])
-        maze.append(["#"," "," "," ","#"," ","#"," ","#"," ","#"])
-        maze.append(["#"," ","#","#","#"," "," "," ","#"," ","#"])
-        maze.append(["#"," ","#"," "," "," ","#"," ","#"," ","#"])
-        maze.append(["#"," "," "," ","#"," ","#"," ","#"," ","#"])
-        maze.append(["#"," ","#"," "," "," "," "," ","#"," ","#"])
-        maze.append(["#"," ","#","#","#","#","#","#","#"," "," "])
-        maze.append(["#"," "," "," "," "," "," "," "," ","#"," "])
-        maze.append(["#","#","#","#","#","#","#","#"," ","#"," "])
-        maze.append(["#","#","#","#","#","#","#","#"," "," "," "])
-        
-    else:
-        #DO NOT USE THIS  CONDITION 
-        file =  open("E:\python programs\pathfinderAlgorithems\BreadthFirstSearch\maze"+str(n)+".txt","r")
-        maze = []
-        for line in file:
-            maze.append(list(line.replace("\n", "")))
-
-    return maze
+mazeName= "maze102" #  file path for mazes E:\python programs\pathfinderAlgorithems\maze
 def findEnd(maze):
     #Searches for Ending point(x)  in maze
     r =-1 #Row coordinate
@@ -113,6 +63,7 @@ def getValidMoves(maze,currentPos,lastpath):
     
     return validMoves
 def main(maze):
+    startTime = time.time()
     print("Starting breadthFirst Search")
     # n is dimension of maze nxn
     pathExplored = [] # variable is also called in boardCheckerMain.py
@@ -135,13 +86,15 @@ def main(maze):
         for j in getValidMoves(maze,currentPos,add):
             q.put(add +j)
         if steps > 50000:
+            
+            print("Failed:Too many steps unable to find it")
             break
-            print("Too many steps unable to find it")
         
     print("Shortest Path = "+add)
     print("Total steps - "+ str(steps))
     shortestPath = add
-    
+    print("Time taken to solve maze ," ,(time.time()-startTime))
     return shortestPath,pathExplored #shortestPath,All path explored return type list,list
-
-#main(createMaze(10))
+m = mazeClass(mazeName)
+maze = m.extractMaze()
+#main(maze)
